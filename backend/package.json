@@ -8,7 +8,8 @@
     "dev": "nodemon index.js",
     "setup": "node setup.js",
     "seed": "node seeder.js",
-    "reset": "node setup.js && node seeder.js"
+    "reset": "node setup.js && node seeder.js",
+    "update-images": "node update-images.js"
   },
   "keywords": ["ecommerce", "libros", "backend", "express", "mysql", "sequelize"],
   "author": "",
