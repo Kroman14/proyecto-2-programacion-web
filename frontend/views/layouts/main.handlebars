@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{title}}</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="/css/style.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Header -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="/">
+                <i class="bi bi-book"></i> LibroStore
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/"><i class="bi bi-house"></i> Inicio</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/libros"><i class="bi bi-collection"></i> Catálogo</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/categorias"><i class="bi bi-tags"></i> Categorías</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/autores"><i class="bi bi-person"></i> Autores</a>
+                    </li>
+                </ul>
+                
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/carrito">
+                            <i class="bi bi-cart3"></i> Carrito
+                            <span class="badge bg-warning text-dark ms-1">0</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/login"><i class="bi bi-person-circle"></i> Iniciar Sesión</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container-fluid p-0">
+        {{{body}}}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-light py-4 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <h5><i class="bi bi-book"></i> LibroStore</h5>
+                    <p class="text-muted">Tu librería online de confianza con la mejor selección de libros.</p>
+                </div>
+                <div class="col-md-4">
+                    <h6>Enlaces Útiles</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="/about" class="text-muted text-decoration-none">Sobre Nosotros</a></li>
+                        <li><a href="/contact" class="text-muted text-decoration-none">Contacto</a></li>
+                        <li><a href="/help" class="text-muted text-decoration-none">Ayuda</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h6>Síguenos</h6>
+                    <div class="d-flex gap-2">
+                        <a href="#" class="text-muted text-decoration-none"><i class="bi bi-facebook fs-5"></i></a>
+                        <a href="#" class="text-muted text-decoration-none"><i class="bi bi-twitter fs-5"></i></a>
+                        <a href="#" class="text-muted text-decoration-none"><i class="bi bi-instagram fs-5"></i></a>
+                    </div>
+                </div>
+            </div>
+            <hr class="my-3">
+            <div class="text-center text-muted">
+                <small>&copy; 2025 LibroStore. Todos los derechos reservados.</small>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="/js/main.js"></script>
+</body>
+</html>
