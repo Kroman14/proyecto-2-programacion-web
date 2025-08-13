@@ -1,0 +1,22 @@
+{
+  "name": "ecommerce-libros-frontend",
+  "version": "1.0.0",
+  "description": "Frontend para ecommerce de libros con Express y Bootstrap",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "keywords": ["ecommerce", "libros", "frontend", "express", "bootstrap"],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2",
+    "axios": "^1.5.0",
+    "express-handlebars": "^7.1.2",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}
