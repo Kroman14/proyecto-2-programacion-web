@@ -2,6 +2,12 @@
 
 **LibroStore** es una aplicación web full-stack para la venta de libros online, desarrollada con tecnologías modernas y una arquitectura robusta.
 
+## 👥 **Información del Proyecto**
+
+**Integrantes del grupo:** Kevin Roman, Jesus Jimenez y Nicolas Lopez
+
+**Proyecto final 2do parcial materia Desarrollo de Aplicaciones Web**
+
 ## 🚀 **Características Principales**
 
 - **Frontend**: Interfaz moderna con Handlebars.js y Bootstrap 5
@@ -236,8 +242,11 @@ Este proyecto está bajo la Licencia ISC. Ver el archivo `LICENSE` para más det
 
 ## 👥 **Autores**
 
-- **Equipo de Desarrollo** - Trabajo inicial
-- **Contribuidores** - Mejoras y funcionalidades adicionales
+- **Kevin Roman** - Desarrollo Frontend y UX/UI
+- **Jesus Jimenez** - Desarrollo Backend y Base de Datos
+- **Nicolas Lopez** - Integración y Testing
+
+*Estudiantes de la materia Desarrollo de Aplicaciones Web - 2do Parcial*
 
 ## 🙏 **Agradecimientos**
 
