@@ -43,7 +43,7 @@
                     <li class="nav-item">
                         <a class="nav-link" href="/carrito">
                             <i class="bi bi-cart3"></i> Carrito
-                            <span class="badge bg-warning text-dark ms-1">0</span>
+                            <span class="badge bg-warning text-dark ms-1 cart-counter" style="display: none;">0</span>
                         </a>
                     </li>
                     {{#if isAuthenticated}}
@@ -68,33 +68,36 @@
         {{{body}}}
     </main>
 
+    <!-- Toast Container para notificaciones -->
+    <div id="toast-container" class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999;"></div>
+
     <!-- Footer -->
     <footer class="bg-dark text-light py-4 mt-5">
         <div class="container">
             <div class="row">
                 <div class="col-md-4">
                     <h5><i class="bi bi-book"></i> LibroStore</h5>
-                    <p class="text-muted">Tu librería online de confianza con la mejor selección de libros.</p>
+                    <p class="text-white">Tu librería online de confianza con la mejor selección de libros.</p>
                 </div>
                 <div class="col-md-4">
                     <h6>Enlaces Útiles</h6>
                     <ul class="list-unstyled">
-                        <li><a href="/about" class="text-muted text-decoration-none">Sobre Nosotros</a></li>
-                        <li><a href="/contact" class="text-muted text-decoration-none">Contacto</a></li>
-                        <li><a href="/help" class="text-muted text-decoration-none">Ayuda</a></li>
+                        <li><a href="/about" class="text-white text-decoration-none">Sobre Nosotros</a></li>
+                        <li><a href="/contact" class="text-white text-decoration-none">Contacto</a></li>
+                        <li><a href="/help" class="text-white text-decoration-none">Ayuda</a></li>
                     </ul>
                 </div>
                 <div class="col-md-4">
                     <h6>Síguenos</h6>
                     <div class="d-flex gap-2">
-                        <a href="#" class="text-muted text-decoration-none"><i class="bi bi-facebook fs-5"></i></a>
-                        <a href="#" class="text-muted text-decoration-none"><i class="bi bi-twitter fs-5"></i></a>
-                        <a href="#" class="text-muted text-decoration-none"><i class="bi bi-instagram fs-5"></i></a>
+                        <a href="#" class="text-white text-decoration-none"><i class="bi bi-facebook fs-5"></i></a>
+                        <a href="#" class="text-white text-decoration-none"><i class="bi bi-twitter fs-5"></i></a>
+                        <a href="#" class="text-white text-decoration-none"><i class="bi bi-instagram fs-5"></i></a>
                     </div>
                 </div>
             </div>
             <hr class="my-3">
-            <div class="text-center text-muted">
+            <div class="text-center text-white">
                 <small>&copy; 2025 LibroStore. Todos los derechos reservados.</small>
             </div>
         </div>
@@ -104,5 +107,6 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Custom JS -->
     <script src="/js/main.js"></script>
+    <script src="/js/cart-counter.js"></script>
 </body>
 </html>

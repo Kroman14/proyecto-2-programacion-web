@@ -119,11 +119,11 @@
                 </button>
               </div>
               <div class="col-sm-6">
-                <button class="btn btn-outline-primary w-100 py-2 add-to-cart"
-                        data-id="{{libro.id}}"
-                        data-title="{{libro.titulo}}"
-                        data-price="{{libro.precio}}"
-                        data-image="{{libro.imagen}}">
+                <button class="btn btn-outline-primary w-100 py-2 add-to-cart-btn-secondary"
+                        data-libro-id="{{libro.id}}"
+                        data-libro-titulo="{{libro.titulo}}"
+                        data-libro-precio="{{libro.precio}}"
+                        data-libro-imagen="{{libro.imagen}}">
                   <i class="fas fa-heart me-2"></i>
                   Agregar también
                 </button>
@@ -272,6 +272,7 @@ document.addEventListener('DOMContentLoaded', function() {
             id: libroId,
             titulo: libroTitulo,
             precio: libroPrecio,
+            imagen: '{{libro.imagen}}',
             cantidad: 1
           });
         }
@@ -310,8 +311,49 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   
   // Funcionalidad para botones adicionales
-  const favoriteBtn = document.querySelector('.btn-outline-primary');
+  const favoriteBtn = document.querySelector('.add-to-cart-btn-secondary');
   const shareBtn = document.querySelector('.btn-outline-secondary');
+  
+  // Agregar funcionalidad al segundo botón de carrito
+  if (favoriteBtn) {
+    favoriteBtn.addEventListener('click', function() {
+      const libroId = this.dataset.libroId;
+      const libroTitulo = this.dataset.libroTitulo;
+      const libroPrecio = this.dataset.libroPrecio;
+      const libroImagen = this.dataset.libroImagen;
+      
+      // Agregar al localStorage como carrito temporal
+      let carrito = JSON.parse(localStorage.getItem('carrito')) || [];
+      
+      // Verificar si el libro ya está en el carrito
+      const existingItem = carrito.find(item => item.id === libroId);
+      
+      if (existingItem) {
+        existingItem.cantidad += 1;
+      } else {
+        carrito.push({
+          id: libroId,
+          titulo: libroTitulo,
+          precio: libroPrecio,
+          imagen: libroImagen,
+          cantidad: 1
+        });
+      }
+      
+      localStorage.setItem('carrito', JSON.stringify(carrito));
+      
+      // Mostrar mensaje de éxito
+      successMessage.classList.remove('d-none');
+      
+      // Actualizar contador del carrito
+      updateCartCounter();
+      
+      // Ocultar mensaje después de 3 segundos
+      setTimeout(() => {
+        successMessage.classList.add('d-none');
+      }, 3000);
+    });
+  }
   
   if (favoriteBtn && favoriteBtn.innerHTML.includes('favoritos')) {
     favoriteBtn.addEventListener('click', function() {

@@ -5,48 +5,370 @@
     <a href="/libros" class="btn btn-outline-primary"><i class="bi bi-arrow-left"></i> Seguir comprando</a>
   </div>
 
-  <div id="cart-root"></div>
+  <!-- Carrito vacío -->
+  <div id="cart-empty" class="text-center py-5" style="display: none;">
+    <div class="empty-cart-container">
+      <i class="bi bi-cart-x display-1 text-muted mb-4"></i>
+      <h3 class="text-muted mb-3">Tu carrito está vacío</h3>
+      <p class="text-muted mb-4">Agrega algunos libros para comenzar a comprar</p>
+      <a href="/libros" class="btn btn-primary btn-lg">
+        <i class="bi bi-search me-2"></i>Explorar catálogo
+      </a>
+    </div>
+  </div>
 
-  <div class="mt-4 text-end">
-    <button id="btn-checkout" class="btn btn-success">
-      <i class="bi bi-credit-card"></i> Confirmar compra
-    </button>
+  <!-- Items del carrito -->
+  <div id="cart-items" style="display: none;">
+    <div class="row">
+      <div class="col-lg-8">
+        <div id="cart-items-list" class="cart-items-container"></div>
+      </div>
+      <div class="col-lg-4">
+        <div class="card">
+          <div class="card-header bg-primary text-white">
+            <h5 class="mb-0"><i class="bi bi-calculator me-2"></i>Resumen del pedido</h5>
+          </div>
+          <div class="card-body">
+            <div class="d-flex justify-content-between mb-2">
+              <span>Subtotal:</span>
+              <span id="subtotal">$0.00</span>
+            </div>
+            <div class="d-flex justify-content-between mb-2">
+              <span>Envío:</span>
+              <span class="text-success">Gratis</span>
+            </div>
+            <hr>
+            <div class="d-flex justify-content-between mb-3">
+              <strong>Total:</strong>
+              <strong id="total" class="text-primary fs-5">$0.00</strong>
+            </div>
+            <button id="btn-checkout" class="btn btn-success w-100">
+              <i class="bi bi-credit-card me-2"></i>Confirmar compra
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  const btn = document.getElementById('btn-checkout');
-  if (!btn) return;
-  btn.addEventListener('click', async function() {
-    try {
-      const token = (document.cookie || '').includes('token=');
-      if (!token) {
-        alert('Debes iniciar sesión para realizar la compra.');
-        window.location.href = '/login';
-        return;
-      }
-      const carrito = JSON.parse(localStorage.getItem('carrito')) || [];
-      if (!carrito.length) {
-        alert('El carrito está vacío');
-        return;
-      }
-      const res = await fetch('/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ items: carrito })
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Error en checkout');
-      // Limpiar carrito y redirigir o mostrar confirmación
-      localStorage.removeItem('carrito');
-      alert('Pedido creado con éxito. ID: ' + (data.pedido && data.pedido.id));
-      window.location.href = '/';
-    } catch (e) {
-      alert(e.message);
+  const cartRoot = document.getElementById('cart-root');
+  const cartEmpty = document.getElementById('cart-empty');
+  const cartItems = document.getElementById('cart-items');
+  const cartItemsList = document.getElementById('cart-items-list');
+  const subtotalElement = document.getElementById('subtotal');
+  const totalElement = document.getElementById('total');
+  const btnCheckout = document.getElementById('btn-checkout');
+
+  // Cargar carrito del localStorage
+  function loadCart() {
+    const carrito = JSON.parse(localStorage.getItem('carrito')) || [];
+    
+    if (carrito.length === 0) {
+      cartEmpty.style.display = 'block';
+      cartItems.style.display = 'none';
+      return;
     }
-  });
+
+    cartEmpty.style.display = 'none';
+    cartItems.style.display = 'block';
+    
+    // Renderizar items
+    renderCartItems(carrito);
+    
+    // Calcular totales
+    calculateTotals(carrito);
+  }
+
+  // Renderizar items del carrito
+  function renderCartItems(carrito) {
+    cartItemsList.innerHTML = '';
+    
+    carrito.forEach((item, index) => {
+      const itemElement = document.createElement('div');
+      itemElement.className = 'card mb-3 cart-item-card';
+      itemElement.innerHTML = `
+        <div class="card-body">
+          <div class="row align-items-center">
+            <div class="col-md-2">
+              <img src="${item.imagen || 'https://placehold.co/100x150/6c757d/ffffff?text=Libro'}" 
+                   class="cart-item-image" 
+                   alt="${item.titulo}">
+            </div>
+            <div class="col-md-4">
+              <h6 class="card-title mb-1 cart-item-title" title="${item.titulo}">${item.titulo}</h6>
+              <p class="text-muted mb-0 small">ID: ${item.id}</p>
+            </div>
+            <div class="col-md-2">
+              <div class="input-group input-group-sm quantity-controls">
+                <button class="btn btn-outline-secondary btn-decrease" data-index="${index}">-</button>
+                <input type="number" class="form-control text-center quantity-input" 
+                       value="${item.cantidad}" min="1" data-index="${index}">
+                <button class="btn btn-outline-secondary btn-increase" data-index="${index}">+</button>
+              </div>
+            </div>
+            <div class="col-md-2 text-center">
+              <span class="price-display">$${parseFloat(item.precio).toFixed(2)}</span>
+            </div>
+            <div class="col-md-2 text-center">
+              <button class="btn btn-outline-danger btn-sm btn-remove" data-index="${index}" 
+                      title="Eliminar del carrito">
+                <i class="bi bi-trash"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      cartItemsList.appendChild(itemElement);
+    });
+
+    // Agregar event listeners
+    addCartEventListeners();
+  }
+
+  // Calcular totales
+  function calculateTotals(carrito) {
+    const subtotal = carrito.reduce((sum, item) => sum + (parseFloat(item.precio) * item.cantidad), 0);
+    const total = subtotal;
+    
+    subtotalElement.textContent = `$${subtotal.toFixed(2)}`;
+    totalElement.textContent = `$${total.toFixed(2)}`;
+  }
+
+  // Agregar event listeners a los botones del carrito
+  function addCartEventListeners() {
+    // Botones de aumentar cantidad
+    document.querySelectorAll('.btn-increase').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const index = parseInt(this.dataset.index);
+        const carrito = JSON.parse(localStorage.getItem('carrito')) || [];
+        carrito[index].cantidad += 1;
+        localStorage.setItem('carrito', JSON.stringify(carrito));
+        loadCart();
+        updateCartCounter();
+      });
+    });
+
+    // Botones de disminuir cantidad
+    document.querySelectorAll('.btn-decrease').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const index = parseInt(this.dataset.index);
+        const carrito = JSON.parse(localStorage.getItem('carrito')) || [];
+        if (carrito[index].cantidad > 1) {
+          carrito[index].cantidad -= 1;
+          localStorage.setItem('carrito', JSON.stringify(carrito));
+          loadCart();
+          updateCartCounter();
+        }
+      });
+    });
+
+    // Input de cantidad
+    document.querySelectorAll('.quantity-input').forEach(input => {
+      input.addEventListener('change', function() {
+        const index = parseInt(this.dataset.index);
+        const newQuantity = parseInt(this.value);
+        if (newQuantity > 0) {
+          const carrito = JSON.parse(localStorage.getItem('carrito')) || [];
+          carrito[index].cantidad = newQuantity;
+          localStorage.setItem('carrito', JSON.stringify(carrito));
+          loadCart();
+          updateCartCounter();
+        }
+      });
+    });
+
+    // Botones de eliminar
+    document.querySelectorAll('.btn-remove').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const index = parseInt(this.dataset.index);
+        const carrito = JSON.parse(localStorage.getItem('carrito')) || [];
+        carrito.splice(index, 1);
+        localStorage.setItem('carrito', JSON.stringify(carrito));
+        loadCart();
+        updateCartCounter();
+      });
+    });
+  }
+
+  // Actualizar contador del carrito
+  function updateCartCounter() {
+    const carrito = JSON.parse(localStorage.getItem('carrito')) || [];
+    const totalItems = carrito.reduce((sum, item) => sum + item.cantidad, 0);
+    
+    const cartCounters = document.querySelectorAll('.cart-counter');
+    cartCounters.forEach(counter => {
+      counter.textContent = totalItems;
+      counter.style.display = totalItems > 0 ? 'inline' : 'none';
+    });
+  }
+
+  // Checkout
+  if (btnCheckout) {
+    btnCheckout.addEventListener('click', async function() {
+      try {
+        const token = (document.cookie || '').includes('token=');
+        if (!token) {
+          alert('Debes iniciar sesión para realizar la compra.');
+          window.location.href = '/login';
+          return;
+        }
+        
+        const carrito = JSON.parse(localStorage.getItem('carrito')) || [];
+        if (!carrito.length) {
+          alert('El carrito está vacío');
+          return;
+        }
+
+        // Mostrar loading
+        this.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Procesando...';
+        this.disabled = true;
+
+        const res = await fetch('/checkout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ items: carrito })
+        });
+        
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Error en checkout');
+        
+        // Limpiar carrito y redirigir
+        localStorage.removeItem('carrito');
+        updateCartCounter();
+        alert('Pedido creado con éxito. ID: ' + (data.pedido && data.pedido.id));
+        window.location.href = '/';
+        
+      } catch (e) {
+        alert(e.message);
+        // Restaurar botón
+        this.innerHTML = '<i class="bi bi-credit-card me-2"></i>Confirmar compra';
+        this.disabled = false;
+      }
+    });
+  }
+
+  // Cargar carrito al iniciar
+  loadCart();
+  updateCartCounter();
 });
 </script>
+
+<style>
+.cart-item-image {
+  max-width: 80px;
+  height: auto;
+  object-fit: cover;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.cart-item-title {
+  font-size: 0.95rem;
+  line-height: 1.2;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.quantity-controls {
+  max-width: 120px;
+}
+
+.price-display {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #198754;
+}
+
+.cart-items-container {
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.cart-item-card {
+  transition: all 0.2s ease;
+  border: 1px solid #e9ecef;
+}
+
+.cart-item-card:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  transform: translateY(-1px);
+}
+
+.quantity-input {
+  text-align: center;
+  font-weight: 600;
+}
+
+.btn-decrease, .btn-increase {
+  min-width: 35px;
+}
+
+.empty-cart-container {
+  padding: 3rem 1rem;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 15px;
+  border: 1px solid #dee2e6;
+}
+
+.empty-cart-container .bi-cart-x {
+  color: #6c757d;
+  opacity: 0.7;
+}
+
+@media (max-width: 768px) {
+  .cart-item-image {
+    max-width: 60px;
+  }
+  
+  .cart-item-title {
+    font-size: 0.85rem;
+  }
+  
+  .quantity-controls {
+    max-width: 100px;
+  }
+  
+  .price-display {
+    font-size: 1rem;
+  }
+  
+  .empty-cart-container {
+    padding: 2rem 1rem;
+  }
+  
+  .empty-cart-container .display-1 {
+    font-size: 3rem;
+  }
+  
+  .empty-cart-container h3 {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .cart-item-card .card-body {
+    padding: 1rem;
+  }
+  
+  .cart-item-image {
+    max-width: 50px;
+  }
+  
+  .quantity-controls {
+    max-width: 90px;
+  }
+  
+  .btn-decrease, .btn-increase {
+    min-width: 30px;
+    padding: 0.25rem 0.5rem;
+  }
+}
+</style>
 
 
