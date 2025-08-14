@@ -1,0 +1,52 @@
+<!-- Carrito de compras -->
+<div class="container my-5">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="fw-bold mb-0"><i class="bi bi-cart3 me-2"></i>Carrito de compras</h1>
+    <a href="/libros" class="btn btn-outline-primary"><i class="bi bi-arrow-left"></i> Seguir comprando</a>
+  </div>
+
+  <div id="cart-root"></div>
+
+  <div class="mt-4 text-end">
+    <button id="btn-checkout" class="btn btn-success">
+      <i class="bi bi-credit-card"></i> Confirmar compra
+    </button>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const btn = document.getElementById('btn-checkout');
+  if (!btn) return;
+  btn.addEventListener('click', async function() {
+    try {
+      const token = (document.cookie || '').includes('token=');
+      if (!token) {
+        alert('Debes iniciar sesión para realizar la compra.');
+        window.location.href = '/login';
+        return;
+      }
+      const carrito = JSON.parse(localStorage.getItem('carrito')) || [];
+      if (!carrito.length) {
+        alert('El carrito está vacío');
+        return;
+      }
+      const res = await fetch('/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ items: carrito })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Error en checkout');
+      // Limpiar carrito y redirigir o mostrar confirmación
+      localStorage.removeItem('carrito');
+      alert('Pedido creado con éxito. ID: ' + (data.pedido && data.pedido.id));
+      window.location.href = '/';
+    } catch (e) {
+      alert(e.message);
+    }
+  });
+});
+</script>
+
+

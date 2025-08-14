@@ -1,6 +1,7 @@
 const express = require('express');
 const axios = require('axios');
 require('dotenv').config();
+const cookieParser = require('cookie-parser');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -11,6 +12,7 @@ app.use(express.static('public'));
 app.use('/images', express.static('public/images')); // Ruta específica para imágenes
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 // Configuración del motor de plantillas Handlebars
 const exphbs = require('express-handlebars');
@@ -74,6 +76,7 @@ app.set('views', './views');
 // Middleware para hacer el BACKEND_URL disponible en todas las vistas
 app.use((req, res, next) => {
   res.locals.BACKEND_URL = BACKEND_URL;
+  res.locals.isAuthenticated = Boolean(req.cookies && req.cookies.token);
   next();
 });
 
@@ -276,8 +279,132 @@ app.get('/autores', async (req, res) => {
   }
 });
 
+// Detalle de un autor específico
+app.get('/autor/:id', async (req, res) => {
+  try {
+    const autorId = req.params.id;
+    const response = await axios.get(`${BACKEND_URL}/autores/${autorId}`);
+    const autor = response.data;
+
+    res.render('detalle-autor', {
+      title: `${autor.nombre} - Autor`,
+      autor: autor,
+      layout: 'main'
+    });
+  } catch (error) {
+    console.error('Error obteniendo detalle del autor:', error.message);
+    res.render('error', {
+      title: 'Autor no encontrado',
+      message: 'El autor que buscas no existe o no está disponible',
+      layout: 'main'
+    });
+  }
+});
+
 app.get('/carrito', (req, res) => {
-  res.json({ message: 'Aquí irá la vista del carrito de compras' });
+  res.render('carrito', {
+    title: 'Carrito de compras',
+    layout: 'main'
+  });
+});
+
+// Login
+app.get('/login', (req, res) => {
+  if (req.cookies && req.cookies.token) {
+    return res.redirect('/');
+  }
+  res.render('login', { title: 'Iniciar sesión', layout: 'main' });
+});
+
+app.post('/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const response = await axios.post(`${BACKEND_URL}/auth/login`, { email, password });
+    const { token, usuario } = response.data;
+
+    // Guardar token (y datos mínimos) en cookies (httpOnly false para SSR simple)
+    res.cookie('token', token, { httpOnly: false, sameSite: 'lax' });
+    res.cookie('userName', usuario && usuario.nombre ? usuario.nombre : '', { httpOnly: false, sameSite: 'lax' });
+    return res.redirect('/');
+  } catch (error) {
+    const message = (error && error.response && error.response.data && error.response.data.error) ? error.response.data.error : 'Error al iniciar sesión';
+    return res.status(401).render('login', { title: 'Iniciar sesión', error: message, layout: 'main' });
+  }
+});
+
+// Logout
+app.get('/logout', (req, res) => {
+  res.clearCookie('token');
+  res.clearCookie('userName');
+  res.redirect('/');
+});
+
+// Mis pedidos (requiere autenticación)
+app.get('/mis-pedidos', async (req, res) => {
+  try {
+    const token = req.cookies && req.cookies.token;
+    if (!token) {
+      return res.redirect('/login');
+    }
+    const response = await axios.get(`${BACKEND_URL}/mis-pedidos`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const pedidos = Array.isArray(response.data) ? response.data : [];
+    res.render('mis-pedidos', {
+      title: 'Mis pedidos',
+      pedidos,
+      layout: 'main'
+    });
+  } catch (error) {
+    console.error('Error obteniendo mis pedidos:', error.message);
+    res.render('mis-pedidos', {
+      title: 'Mis pedidos',
+      pedidos: [],
+      error: 'No se pudieron cargar tus pedidos',
+      layout: 'main'
+    });
+  }
+});
+
+// Checkout: crear pedido en backend a partir del carrito del cliente
+app.post('/checkout', async (req, res) => {
+  try {
+    const token = req.cookies && req.cookies.token;
+    if (!token) {
+      return res.status(401).json({ error: 'Debes iniciar sesión para comprar' });
+    }
+
+    const { items, direccion_envio, telefono_contacto, notas } = req.body || {};
+    if (!Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ error: 'El carrito está vacío' });
+    }
+
+    // Mapear items al formato esperado por el backend
+    const payload = {
+      items: items.map(it => ({
+        libro_id: Number(it.id || it.libro_id),
+        cantidad: Number(it.cantidad) || 1
+      })),
+      direccion_envio: direccion_envio || 'Sin dirección',
+      telefono_contacto: telefono_contacto || '',
+      notas: notas || ''
+    };
+
+    const response = await axios.post(
+      `${BACKEND_URL}/pedidos`,
+      payload,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+
+    return res.status(201).json({
+      message: 'Pedido creado exitosamente',
+      pedido: response.data
+    });
+  } catch (error) {
+    const status = (error.response && error.response.status) || 500;
+    const errMsg = (error.response && error.response.data && error.response.data.error) || error.message || 'Error en checkout';
+    return res.status(status).json({ error: errMsg });
+  }
 });
 
 app.get('/admin', (req, res) => {

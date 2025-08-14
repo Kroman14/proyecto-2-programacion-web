@@ -1,0 +1,25 @@
+<!-- Login -->
+<div class="container my-5" style="max-width: 540px;">
+  <h1 class="fw-bold text-center mb-4">Iniciar sesión</h1>
+
+  {{#if error}}
+    <div class="alert alert-danger">{{error}}</div>
+  {{/if}}
+
+  <form method="POST" action="/login" class="card shadow-sm p-4">
+    <div class="mb-3">
+      <label for="email" class="form-label">Correo electrónico</label>
+      <input type="email" name="email" id="email" class="form-control" placeholder="tu@email.com" required>
+    </div>
+    <div class="mb-3">
+      <label for="password" class="form-label">Contraseña</label>
+      <input type="password" name="password" id="password" class="form-control" placeholder="••••••••" required>
+    </div>
+    <button type="submit" class="btn btn-primary w-100">Ingresar</button>
+  </form>
+  <div class="text-center mt-3">
+    <small class="text-muted">Usuario demo: admin@ecommerce.com / admin123</small>
+  </div>
+</div>
+
+

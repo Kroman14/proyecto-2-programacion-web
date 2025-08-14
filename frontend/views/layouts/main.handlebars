@@ -46,9 +46,18 @@
                             <span class="badge bg-warning text-dark ms-1">0</span>
                         </a>
                     </li>
+                    {{#if isAuthenticated}}
+                    <li class="nav-item">
+                        <a class="nav-link" href="/mis-pedidos"><i class="bi bi-bag-check"></i> Mis pedidos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/logout"><i class="bi bi-box-arrow-right"></i> Salir</a>
+                    </li>
+                    {{else}}
                     <li class="nav-item">
                         <a class="nav-link" href="/login"><i class="bi bi-person-circle"></i> Iniciar Sesión</a>
                     </li>
+                    {{/if}}
                 </ul>
             </div>
         </div>

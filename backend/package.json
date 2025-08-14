@@ -10,6 +10,7 @@
     "seed": "node seeder.js",
     "reset": "node setup.js && node seeder.js",
     "update-images": "node update-images.js",
+    "update-author-images": "node update-author-images.js",
     "test-images": "node test-images.js"
   },
   "keywords": [
