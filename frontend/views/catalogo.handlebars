@@ -1,0 +1,340 @@
+<!-- Catálogo completo de libros -->
+<div class="container mt-5">
+  <!-- Header del catálogo -->
+  <div class="row mb-5">
+    <div class="col-12 text-center">
+      <h1 class="display-4 fw-bold text-primary mb-3">Catálogo Completo</h1>
+      <p class="lead text-muted">Explora nuestra colección completa de libros</p>
+      {{#if pagination.totalItems}}
+        <p class="text-secondary">
+          Mostrando {{libros.length}} de {{pagination.totalItems}} libros disponibles
+          {{#if pagination.totalPages}}
+            - Página {{pagination.currentPage}} de {{pagination.totalPages}}
+          {{/if}}
+        </p>
+      {{/if}}
+    </div>
+  </div>
+
+  <!-- Filtros de búsqueda -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h5 class="card-title mb-3">
+            <i class="fas fa-filter me-2"></i>Filtros de búsqueda
+          </h5>
+          <form method="GET" action="/libros">
+            <div class="row g-3">
+              <!-- Búsqueda por texto -->
+              <div class="col-md-4">
+                <label for="search" class="form-label">Buscar libro o autor</label>
+                <input type="text" 
+                       class="form-control" 
+                       id="search" 
+                       name="search" 
+                       placeholder="Nombre del libro o autor..."
+                       value="{{currentFilters.search}}">
+              </div>
+              <!-- Filtro por categoría -->
+              <div class="col-md-4">
+                <label for="categoria" class="form-label">Categoría</label>
+                <select class="form-select" id="categoria" name="categoria">
+                  <option value="">Todas las categorías</option>
+                  {{#each categorias}}
+                    <option value="{{this.id}}" {{#if (eq this.id ../currentFilters.categoria)}}selected{{/if}}>
+                      {{this.nombre}}
+                    </option>
+                  {{/each}}
+                </select>
+              </div>
+              <!-- Botones -->
+              <div class="col-md-4 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary me-2">
+                  <i class="fas fa-search me-1"></i>Buscar
+                </button>
+                <a href="/libros" class="btn btn-outline-secondary">
+                  <i class="fas fa-times me-1"></i>Limpiar
+                </a>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {{#if error}}
+    <!-- Mensaje de error -->
+    <div class="row">
+      <div class="col-12">
+        <div class="alert alert-danger text-center" role="alert">
+          <h4 class="alert-heading">¡Oops!</h4>
+          <p>{{error}}</p>
+          <a href="/" class="btn btn-primary">Volver al inicio</a>
+        </div>
+      </div>
+    </div>
+  {{else if libros.length}}
+    <!-- Grid de libros -->
+    <div class="row g-4">
+      {{#each libros}}
+        <div class="col-md-6 col-lg-4 col-xl-3">
+          <div class="card h-100 shadow-sm book-card">
+            <div class="card-img-container position-relative" style="height: 300px; overflow: hidden; background: #f8f9fa; display: flex; align-items: center; justify-content: center;">
+              <img src="{{this.imagen}}" 
+                   class="card-img-top" 
+                   style="max-width: 100%; max-height: 100%; object-fit: contain; transition: transform 0.3s ease; display: block; opacity: 0;"
+                   alt="Portada de {{this.titulo}}"
+                   onerror="this.style.display='none'; this.parentElement.innerHTML='<div class=\'d-flex align-items-center justify-content-center h-100 bg-light\'><div class=\'text-center text-muted\'><i class=\'fas fa-book fa-3x mb-2\'></i><br><small>Imagen no disponible</small></div></div>';"
+                   onload="this.style.opacity='1';">
+              <div class="position-absolute top-0 end-0 m-2">
+                <span class="badge bg-primary">${{this.precio}}</span>
+              </div>
+            </div>
+            <div class="card-body d-flex flex-column">
+              <h5 class="card-title text-primary fw-bold" style="min-height: 2.5rem; line-height: 1.25;">
+                {{this.titulo}}
+              </h5>
+              <p class="card-text text-secondary mb-2">
+                <small>
+                  <i class="fas fa-user"></i> {{this.Autor.nombre}}
+                  {{#if this.Categoria}}
+                    | <i class="fas fa-tag"></i> {{this.Categoria.nombre}}
+                  {{/if}}
+                </small>
+              </p>
+              <p class="card-text flex-grow-1" style="min-height: 3rem;">
+                {{#if this.descripcion}}
+                  {{this.descripcion}}
+                {{else}}
+                  Una obra fascinante que te transportará a mundos únicos y experiencias inolvidables.
+                {{/if}}
+              </p>
+              <div class="mt-auto">
+                <div class="d-flex justify-content-between align-items-center">
+                  <span class="h5 text-success mb-0 fw-bold">${{this.precio}}</span>
+                  <a href="/libro/{{this.id}}" class="btn btn-primary btn-sm">
+                    <i class="fas fa-eye"></i> Ver detalle
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      {{/each}}
+    </div>
+
+    <!-- Paginación -->
+    {{#if pagination.totalPages}}
+      {{#if (gt pagination.totalPages 1)}}
+        <div class="row mt-5">
+          <div class="col-12">
+            <nav aria-label="Navegación de páginas">
+              <ul class="pagination justify-content-center">
+                <!-- Botón anterior -->
+                {{#if pagination.hasPrev}}
+                  <li class="page-item">
+                    <a class="page-link" href="/libros?page={{pagination.prevPage}}" aria-label="Anterior">
+                      <span aria-hidden="true">&laquo;</span>
+                    </a>
+                  </li>
+                {{else}}
+                  <li class="page-item disabled">
+                    <span class="page-link" aria-label="Anterior">
+                      <span aria-hidden="true">&laquo;</span>
+                    </span>
+                  </li>
+                {{/if}}
+
+                <!-- Páginas -->
+                {{#times pagination.totalPages}}
+                  {{#if (eq this pagination.currentPage)}}
+                    <li class="page-item active">
+                      <span class="page-link">{{this}}</span>
+                    </li>
+                  {{else}}
+                    <li class="page-item">
+                      <a class="page-link" href="/libros?page={{this}}">{{this}}</a>
+                    </li>
+                  {{/if}}
+                {{/times}}
+
+                <!-- Botón siguiente -->
+                {{#if pagination.hasNext}}
+                  <li class="page-item">
+                    <a class="page-link" href="/libros?page={{pagination.nextPage}}" aria-label="Siguiente">
+                      <span aria-hidden="true">&raquo;</span>
+                    </a>
+                  </li>
+                {{else}}
+                  <li class="page-item disabled">
+                    <span class="page-link" aria-label="Siguiente">
+                      <span aria-hidden="true">&raquo;</span>
+                    </span>
+                  </li>
+                {{/if}}
+              </ul>
+            </nav>
+          </div>
+        </div>
+      {{/if}}
+    {{/if}}
+
+  {{else}}
+    <!-- Sin libros -->
+    <div class="row">
+      <div class="col-12 text-center">
+        <div class="alert alert-info" role="alert">
+          <h4 class="alert-heading">No hay libros disponibles</h4>
+          <p>En este momento no tenemos libros en nuestro catálogo.</p>
+          <a href="/" class="btn btn-primary">Volver al inicio</a>
+        </div>
+      </div>
+    </div>
+  {{/if}}
+</div>
+
+<!-- Estilos adicionales -->
+<style>
+.book-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: none;
+  border-radius: 15px;
+  overflow: hidden;
+}
+
+.book-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15) !important;
+}
+
+.book-card:hover .card-img-top {
+  transform: scale(1.02);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+}
+
+.card-img-container {
+  border-radius: 15px 15px 0 0;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  position: relative;
+  height: 300px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+}
+
+.card-img-top {
+  max-width: 100% !important;
+  max-height: 100% !important;
+  width: auto !important;
+  height: auto !important;
+  object-fit: contain !important;
+  object-position: center !important;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* Asegurar que las imágenes se carguen correctamente */
+.card-img-top[src=""] {
+  display: none;
+}
+
+.pagination .page-link {
+  border-radius: 50px;
+  margin: 0 2px;
+  border: none;
+  color: #007bff;
+}
+
+.pagination .page-item.active .page-link {
+  background-color: #007bff;
+  border-color: #007bff;
+}
+
+@media (max-width: 768px) {
+  .book-card:hover {
+    transform: none;
+  }
+  
+  .card-img-container {
+    height: 250px;
+  }
+  
+  .pagination {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .card-img-container {
+    height: 200px;
+  }
+}
+</style>
+
+<!-- Script para mejorar la experiencia -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Agregar loading state a los enlaces de paginación
+  const paginationLinks = document.querySelectorAll('.pagination .page-link');
+  paginationLinks.forEach(link => {
+    link.addEventListener('click', function() {
+      this.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
+    });
+  });
+  
+  // Mejorar carga de imágenes
+  const images = document.querySelectorAll('.card-img-top');
+  images.forEach(img => {
+    // Asegurar que la imagen tenga src
+    if (img.src && img.src !== window.location.href) {
+      img.style.opacity = '0';
+      img.style.transition = 'opacity 0.3s ease';
+      
+      // Cuando la imagen se carga
+      img.onload = function() {
+        this.style.opacity = '1';
+      };
+      
+      // Si hay error al cargar
+      img.onerror = function() {
+        const container = this.parentElement;
+        container.innerHTML = `
+          <div class="d-flex align-items-center justify-content-center h-100 bg-light text-muted">
+            <div class="text-center">
+              <i class="fas fa-book fa-3x mb-2"></i>
+              <br><small>Imagen no disponible</small>
+            </div>
+          </div>
+        `;
+      };
+      
+      // Forzar recarga si ya está cacheada
+      if (img.complete) {
+        img.style.opacity = '1';
+      }
+    } else {
+      // Si no hay src, mostrar placeholder
+      const container = img.parentElement;
+      container.innerHTML = `
+        <div class="d-flex align-items-center justify-content-center h-100 bg-light text-muted">
+          <div class="text-center">
+            <i class="fas fa-book fa-3x mb-2"></i>
+            <br><small>Sin imagen</small>
+          </div>
+        </div>
+      `;
+    }
+  });
+  
+  // Debug: mostrar URLs de imágenes en consola
+  console.log('🖼️ URLs de imágenes en catálogo:');
+  images.forEach((img, index) => {
+    console.log(`${index + 1}. ${img.src}`);
+  });
+});
+</script>

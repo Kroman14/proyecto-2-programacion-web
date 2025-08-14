@@ -1,0 +1,205 @@
+<!-- Catálogo de autores -->
+<div class="container mt-5">
+  <!-- Header del catálogo -->
+  <div class="row mb-5">
+    <div class="col-12 text-center">
+      <h1 class="display-4 fw-bold text-primary mb-3">Nuestros Autores</h1>
+      <p class="lead text-muted">Conoce a los escritores de nuestra colección</p>
+      {{#if pagination.totalItems}}
+        <p class="text-secondary">
+          Mostrando {{autores.length}} de {{pagination.totalItems}} autores
+          {{#if pagination.totalPages}}
+            - Página {{pagination.currentPage}} de {{pagination.totalPages}}
+          {{/if}}
+        </p>
+      {{/if}}
+    </div>
+  </div>
+
+  <!-- Filtros de búsqueda -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h5 class="card-title mb-3">
+            <i class="fas fa-search me-2"></i>Buscar autor
+          </h5>
+          <form method="GET" action="/autores">
+            <div class="row g-3">
+              <!-- Búsqueda por nombre -->
+              <div class="col-md-8">
+                <label for="search" class="form-label">Nombre del autor</label>
+                <input type="text" 
+                       class="form-control" 
+                       id="search" 
+                       name="search" 
+                       placeholder="Buscar por nombre..."
+                       value="{{currentFilters.search}}">
+              </div>
+              <!-- Botones -->
+              <div class="col-md-4 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary me-2">
+                  <i class="fas fa-search me-1"></i>Buscar
+                </button>
+                <a href="/autores" class="btn btn-outline-secondary">
+                  <i class="fas fa-times me-1"></i>Limpiar
+                </a>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {{#if error}}
+    <!-- Mensaje de error -->
+    <div class="row">
+      <div class="col-12">
+        <div class="alert alert-danger text-center" role="alert">
+          <h4 class="alert-heading">¡Oops!</h4>
+          <p>{{error}}</p>
+          <a href="/" class="btn btn-primary">Volver al inicio</a>
+        </div>
+      </div>
+    </div>
+  {{else if autores.length}}
+    <!-- Grid de autores -->
+    <div class="row g-4">
+      {{#each autores}}
+        <div class="col-md-6 col-lg-4 col-xl-3">
+          <div class="card h-100 shadow-sm author-card">
+            <div class="card-img-container position-relative" style="height: 200px; overflow: hidden; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center;">
+              {{#if this.foto}}
+                <img src="{{this.foto}}" 
+                     class="card-img-top" 
+                     style="max-width: 100%; max-height: 100%; object-fit: cover; transition: transform 0.3s ease;"
+                     alt="Foto de {{this.nombre}}"
+                     onerror="this.style.display='none'; this.parentElement.innerHTML='<div class=\'d-flex align-items-center justify-content-center h-100 text-white\'><div class=\'text-center\'><i class=\'fas fa-user fa-3x mb-2\'></i><br><small>{{this.nombre}}</small></div></div>';">
+              {{else}}
+                <div class="d-flex align-items-center justify-content-center h-100 text-white">
+                  <div class="text-center">
+                    <i class="fas fa-user fa-3x mb-2"></i>
+                    <br><small>{{this.nombre}}</small>
+                  </div>
+                </div>
+              {{/if}}
+            </div>
+            <div class="card-body d-flex flex-column">
+              <h5 class="card-title text-primary fw-bold text-center" style="min-height: 2.5rem; line-height: 1.25;">
+                {{this.nombre}}
+              </h5>
+              {{#if this.nacionalidad}}
+                <p class="text-muted text-center mb-2">
+                  <i class="fas fa-globe me-1"></i>{{this.nacionalidad}}
+                </p>
+              {{/if}}
+              {{#if this.fecha_nacimiento}}
+                <p class="text-muted text-center mb-2">
+                  <i class="fas fa-calendar me-1"></i>{{formatDate this.fecha_nacimiento}}
+                </p>
+              {{/if}}
+              {{#if this.biografia}}
+                <p class="card-text text-muted small" style="flex-grow: 1;">
+                  {{truncate this.biografia 120}}
+                </p>
+              {{/if}}
+              <div class="mt-auto">
+                <a href="/autor/{{this.id}}" class="btn btn-primary w-100">
+                  <i class="fas fa-user me-2"></i>Ver perfil
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      {{/each}}
+    </div>
+
+    <!-- Paginación -->
+    {{#if pagination.totalPages}}
+      {{#if (gt pagination.totalPages 1)}}
+        <nav aria-label="Paginación de autores" class="mt-5">
+          <ul class="pagination justify-content-center">
+            {{#if pagination.hasPrev}}
+              <li class="page-item">
+                <a class="page-link" href="/autores?page={{pagination.prevPage}}{{#if currentFilters.search}}&search={{currentFilters.search}}{{/if}}" aria-label="Anterior">
+                  <span aria-hidden="true">&laquo;</span>
+                </a>
+              </li>
+            {{else}}
+              <li class="page-item disabled">
+                <span class="page-link" aria-hidden="true">&laquo;</span>
+              </li>
+            {{/if}}
+
+            {{#each (range 1 pagination.totalPages)}}
+              {{#if (eq this ../pagination.currentPage)}}
+                <li class="page-item active">
+                  <span class="page-link">{{this}}</span>
+                </li>
+              {{else}}
+                <li class="page-item">
+                  <a class="page-link" href="/autores?page={{this}}{{#if ../currentFilters.search}}&search={{../currentFilters.search}}{{/if}}">{{this}}</a>
+                </li>
+              {{/if}}
+            {{/each}}
+
+            {{#if pagination.hasNext}}
+              <li class="page-item">
+                <a class="page-link" href="/autores?page={{pagination.nextPage}}{{#if currentFilters.search}}&search={{currentFilters.search}}{{/if}}" aria-label="Siguiente">
+                  <span aria-hidden="true">&raquo;</span>
+                </a>
+              </li>
+            {{else}}
+              <li class="page-item disabled">
+                <span class="page-link" aria-hidden="true">&raquo;</span>
+              </li>
+            {{/if}}
+          </ul>
+        </nav>
+      {{/if}}
+    {{/if}}
+
+  {{else}}
+    <!-- No hay autores -->
+    <div class="row">
+      <div class="col-12">
+        <div class="text-center py-5">
+          <i class="fas fa-users text-muted" style="font-size: 4rem;"></i>
+          <h3 class="text-muted mt-3">No se encontraron autores</h3>
+          <p class="text-muted">No hay autores que coincidan con tu búsqueda.</p>
+          <a href="/autores" class="btn btn-primary">
+            <i class="fas fa-refresh me-2"></i>Ver todos los autores
+          </a>
+        </div>
+      </div>
+    </div>
+  {{/if}}
+</div>
+
+<!-- Estilos adicionales -->
+<style>
+.author-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+}
+
+.author-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.author-card:hover .card-img-top {
+  transform: scale(1.05);
+}
+
+.card-img-container {
+  border-radius: 0.375rem 0.375rem 0 0;
+}
+
+@media (max-width: 768px) {
+  .author-card {
+    margin-bottom: 1rem;
+  }
+}
+</style>

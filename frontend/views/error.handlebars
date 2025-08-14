@@ -1,0 +1,86 @@
+<!-- Página de error -->
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-6 col-md-8">
+      <div class="text-center">
+        <!-- Icono de error -->
+        <div class="error-icon mb-4">
+          <i class="fas fa-exclamation-triangle text-warning" style="font-size: 5rem;"></i>
+        </div>
+        
+        <!-- Título del error -->
+        <h1 class="display-4 fw-bold text-dark mb-3">¡Oops!</h1>
+        
+        <!-- Mensaje del error -->
+        <h2 class="h4 text-secondary mb-4">
+          {{#if message}}
+            {{message}}
+          {{else}}
+            Algo salió mal
+          {{/if}}
+        </h2>
+        
+        <!-- Descripción adicional -->
+        <p class="text-muted mb-5">
+          {{#if description}}
+            {{description}}
+          {{else}}
+            No te preocupes, esto puede pasar. Te sugerimos algunas opciones para continuar navegando.
+          {{/if}}
+        </p>
+        
+        <!-- Botones de acción -->
+        <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center">
+          <a href="/" class="btn btn-primary btn-lg">
+            <i class="fas fa-home me-2"></i>
+            Ir al inicio
+          </a>
+          <a href="/libros" class="btn btn-outline-primary btn-lg">
+            <i class="fas fa-book me-2"></i>
+            Ver catálogo
+          </a>
+          <button onclick="history.back()" class="btn btn-outline-secondary btn-lg">
+            <i class="fas fa-arrow-left me-2"></i>
+            Volver atrás
+          </button>
+        </div>
+        
+        <!-- Información adicional -->
+        <div class="mt-5 pt-4 border-top">
+          <small class="text-muted">
+            Si el problema persiste, puedes 
+            <a href="#" class="text-decoration-none">contactar con soporte</a>
+          </small>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Estilos adicionales -->
+<style>
+.error-icon {
+  animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-10px);
+  }
+  60% {
+    transform: translateY(-5px);
+  }
+}
+
+.btn {
+  transition: all 0.3s ease;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+</style>

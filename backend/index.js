@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const { Op } = require('sequelize');
 const { sequelize, Usuario, Categoria, Autor, Libro, Pedido, DetallePedido } = require('./models');
 
 const app = express();
@@ -197,23 +198,46 @@ app.get('/categorias/:id', async (req, res) => {
 // Obtener todos los autores
 app.get('/autores', async (req, res) => {
   try {
-    const autores = await Autor.findAll({
-      where: { activo: true },
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const offset = (page - 1) * limit;
+    const search = req.query.search || '';
+    
+    let whereClause = { activo: true };
+    
+    // Filtro por búsqueda en nombre
+    if (search) {
+      whereClause = {
+        ...whereClause,
+        nombre: { [Op.like]: `%${search}%` }
+      };
+    }
+
+    const { count, rows } = await Autor.findAndCountAll({
+      where: whereClause,
       include: [{
         model: Libro,
         as: 'libros',
         attributes: ['id'],
         where: { activo: true },
         required: false
-      }]
+      }],
+      limit: parseInt(limit),
+      offset: parseInt(offset),
+      order: [['nombre', 'ASC']]
     });
     
-    const autoresConConteo = autores.map(autor => ({
+    const autoresConConteo = rows.map(autor => ({
       ...autor.toJSON(),
       total_libros: autor.libros ? autor.libros.length : 0
     }));
     
-    res.json(autoresConConteo);
+    res.json({
+      autores: autoresConConteo,
+      totalPages: Math.ceil(count / limit),
+      currentPage: parseInt(page),
+      totalItems: count
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -294,14 +318,14 @@ app.get('/libros', async (req, res) => {
       whereClause.autor_id = autor;
     }
 
-    // Búsqueda por texto
+    // Búsqueda por texto (en título, descripción y nombre del autor)
     if (search) {
-      const { Op } = require('sequelize');
       whereClause = {
         ...whereClause,
         [Op.or]: [
           { titulo: { [Op.like]: `%${search}%` } },
-          { descripcion: { [Op.like]: `%${search}%` } }
+          { descripcion: { [Op.like]: `%${search}%` } },
+          { '$autor.nombre$': { [Op.like]: `%${search}%` } }
         ]
       };
     }

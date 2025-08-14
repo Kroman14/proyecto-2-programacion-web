@@ -31,6 +31,40 @@ app.engine('handlebars', exphbs.engine({
     // Helper para formatear precio
     formatPrice: function(price) {
       return `$${parseFloat(price).toFixed(2)}`;
+    },
+    // Helper para formatear fechas
+    formatDate: function(date) {
+      if (!date) return 'No disponible';
+      const options = { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      };
+      return new Date(date).toLocaleDateString('es-ES', options);
+    },
+    // Helper para comparar valores
+    eq: function(a, b) {
+      return a === b;
+    },
+    // Helper para mayor que
+    gt: function(a, b) {
+      return a > b;
+    },
+    // Helper para generar rango de números (para paginación)
+    times: function(n, block) {
+      let result = '';
+      for (let i = 1; i <= n; i++) {
+        result += block.fn(i);
+      }
+      return result;
+    },
+    // Helper para generar rango de números
+    range: function(start, end) {
+      const result = [];
+      for (let i = start; i <= end; i++) {
+        result.push(i);
+      }
+      return result;
     }
   }
 }));
@@ -48,7 +82,13 @@ app.get('/', async (req, res) => {
   try {
     // Obtener libros destacados desde el backend
     const response = await axios.get(`${BACKEND_URL}/libros`);
-    const libros = response.data.libros ? response.data.libros.slice(0, 6) : []; // Solo los primeros 6 libros
+    
+    // El backend retorna { libros: [...], totalPages, currentPage, totalItems }
+    const librosData = response.data.libros || response.data;
+    const libros = Array.isArray(librosData) ? librosData.slice(0, 6) : [];
+    
+    console.log('📚 Libros obtenidos:', libros.length);
+    console.log('🖼️ Primera imagen:', libros[0]?.imagen);
     
     res.render('home', {
       title: 'Ecommerce de Libros - Inicio',
@@ -69,10 +109,19 @@ app.get('/', async (req, res) => {
 // Ruta para probar conexión con backend
 app.get('/test-backend', async (req, res) => {
   try {
-    const response = await axios.get(`${BACKEND_URL}/`);
+    const response = await axios.get(`${BACKEND_URL}/libros`);
+    const librosData = response.data.libros || response.data;
+    
     res.json({
       message: 'Conexión con backend exitosa',
-      backend_response: response.data
+      estructura_respuesta: {
+        tiene_libros: !!response.data.libros,
+        es_array_directo: Array.isArray(response.data),
+        estructura: Object.keys(response.data)
+      },
+      total_libros: Array.isArray(librosData) ? librosData.length : 0,
+      primer_libro: Array.isArray(librosData) ? librosData[0] : null,
+      datos_completos: response.data
     });
   } catch (error) {
     res.status(500).json({
@@ -83,7 +132,93 @@ app.get('/test-backend', async (req, res) => {
 });
 
 // Rutas básicas que el compañero puede desarrollar
-app.get('/libros', (req, res) => {
+
+// Catálogo completo de libros
+app.get('/libros', async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = 12; // 12 libros por página
+    const search = req.query.search || '';
+    const categoria = req.query.categoria || '';
+    
+    // Construir parámetros de consulta
+    const params = new URLSearchParams();
+    params.append('page', page);
+    params.append('limit', limit);
+    if (search) params.append('search', search);
+    if (categoria) params.append('categoria', categoria);
+    
+    // Obtener libros
+    const librosResponse = await axios.get(`${BACKEND_URL}/libros?${params.toString()}`);
+    const librosData = librosResponse.data.libros || librosResponse.data;
+    const totalPages = librosResponse.data.totalPages || 1;
+    const currentPage = librosResponse.data.currentPage || 1;
+    const totalItems = librosResponse.data.totalItems || 0;
+    
+    // Obtener categorías para el filtro
+    const categoriasResponse = await axios.get(`${BACKEND_URL}/categorias`);
+    const categorias = categoriasResponse.data.categorias || categoriasResponse.data || [];
+    
+    console.log('📚 Catálogo - Libros obtenidos:', Array.isArray(librosData) ? librosData.length : 0);
+    console.log('🏷️ Categorías obtenidas:', categorias.length);
+    
+    res.render('catalogo', {
+      title: 'Catálogo de Libros',
+      libros: librosData,
+      categorias: categorias,
+      currentFilters: {
+        search: search,
+        categoria: categoria
+      },
+      pagination: {
+        currentPage,
+        totalPages,
+        totalItems,
+        hasNext: currentPage < totalPages,
+        hasPrev: currentPage > 1,
+        nextPage: currentPage + 1,
+        prevPage: currentPage - 1
+      },
+      layout: 'main'
+    });
+  } catch (error) {
+    console.error('Error obteniendo catálogo:', error.message);
+    res.render('catalogo', {
+      title: 'Catálogo de Libros',
+      libros: [],
+      categorias: [],
+      currentFilters: {},
+      error: 'Error cargando el catálogo',
+      layout: 'main'
+    });
+  }
+});
+
+// Detalle de un libro específico
+app.get('/libro/:id', async (req, res) => {
+  try {
+    const libroId = req.params.id;
+    const response = await axios.get(`${BACKEND_URL}/libros/${libroId}`);
+    const libro = response.data;
+    
+    console.log('📖 Detalle del libro:', libro.titulo);
+    
+    res.render('detalle-libro', {
+      title: `${libro.titulo} - Detalle`,
+      libro: libro,
+      layout: 'main'
+    });
+  } catch (error) {
+    console.error('Error obteniendo detalle del libro:', error.message);
+    res.render('error', {
+      title: 'Libro no encontrado',
+      message: 'El libro que buscas no existe o no está disponible',
+      layout: 'main'
+    });
+  }
+});
+
+app.get('/libros_old', (req, res) => {
   res.json({ message: 'Aquí irá la vista de catálogo de libros' });
 });
 
@@ -91,8 +226,54 @@ app.get('/categorias', (req, res) => {
   res.json({ message: 'Aquí irá la vista de categorías' });
 });
 
-app.get('/autores', (req, res) => {
-  res.json({ message: 'Aquí irá la vista de autores' });
+// Catálogo de autores
+app.get('/autores', async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = 12; // 12 autores por página
+    const search = req.query.search || '';
+    
+    // Construir parámetros de consulta
+    const params = new URLSearchParams();
+    params.append('page', page);
+    params.append('limit', limit);
+    if (search) params.append('search', search);
+    
+    const response = await axios.get(`${BACKEND_URL}/autores?${params.toString()}`);
+    const autoresData = response.data.autores || response.data;
+    const totalPages = response.data.totalPages || 1;
+    const currentPage = response.data.currentPage || 1;
+    const totalItems = response.data.totalItems || 0;
+    
+    console.log('👥 Autores obtenidos:', Array.isArray(autoresData) ? autoresData.length : 0);
+    
+    res.render('autores', {
+      title: 'Catálogo de Autores',
+      autores: autoresData,
+      currentFilters: {
+        search: search
+      },
+      pagination: {
+        currentPage,
+        totalPages,
+        totalItems,
+        hasNext: currentPage < totalPages,
+        hasPrev: currentPage > 1,
+        nextPage: currentPage + 1,
+        prevPage: currentPage - 1
+      },
+      layout: 'main'
+    });
+  } catch (error) {
+    console.error('Error obteniendo autores:', error.message);
+    res.render('autores', {
+      title: 'Catálogo de Autores',
+      autores: [],
+      currentFilters: {},
+      error: 'Error cargando los autores',
+      layout: 'main'
+    });
+  }
 });
 
 app.get('/carrito', (req, res) => {
