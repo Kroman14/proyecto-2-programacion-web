@@ -1,69 +1,55 @@
-<!-- Detalle de autor -->
 <div class="container mt-5">
-  <!-- Cabecera del autor -->
-  <div class="row align-items-center mb-4">
-    <div class="col-md-3 text-center mb-3 mb-md-0">
-      {{#if autor.foto}}
-        <img src="{{autor.foto}}" alt="{{autor.nombre}}" class="img-fluid rounded shadow-sm" onerror="this.style.display='none'">
-      {{else}}
-        <div class="bg-light rounded d-flex align-items-center justify-content-center" style="height:220px;">
-          <i class="fas fa-user fa-4x text-muted"></i>
-        </div>
-      {{/if}}
-    </div>
-    <div class="col-md-9">
-      <h1 class="fw-bold text-primary">{{autor.nombre}}</h1>
-      {{#if autor.nacionalidad}}
-        <p class="text-muted mb-1"><i class="fas fa-globe me-2"></i>{{autor.nacionalidad}}</p>
-      {{/if}}
-      {{#if autor.fecha_nacimiento}}
-        <p class="text-muted mb-3"><i class="fas fa-calendar me-2"></i>{{formatDate autor.fecha_nacimiento}}</p>
-      {{/if}}
-      {{#if autor.biografia}}
-        <p class="lead">{{autor.biografia}}</p>
-      {{/if}}
-      <a href="/autores" class="btn btn-outline-secondary btn-sm"><i class="fas fa-arrow-left me-1"></i> Volver a autores</a>
-    </div>
-  </div>
+  <nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="/" class="text-decoration-none">Inicio</a></li>
+      <li class="breadcrumb-item"><a href="/autores" class="text-decoration-none">Autores</a></li>
+      <li class="breadcrumb-item active" aria-current="page">{{autor.nombre}}</li>
+    </ol>
+  </nav>
 
-  <!-- Libros del autor -->
-  <div class="row mt-4">
-    <div class="col-12">
-      <h2 class="h4 fw-bold mb-3"><i class="fas fa-book me-2"></i>Libros de {{autor.nombre}}</h2>
-    </div>
-
-    {{#if autor.libros.length}}
-      {{#each autor.libros}}
-        <div class="col-sm-6 col-md-4 col-lg-3 mb-4">
-          <div class="card h-100 shadow-sm">
-            <div class="ratio ratio-2x3 bg-light">
-              {{#if this.imagen}}
-                <img src="{{this.imagen}}" class="card-img-top" alt="{{this.titulo}}" onerror="this.src='/images/default-book.jpg'"/>
-              {{else}}
-                <div class="d-flex align-items-center justify-content-center text-muted">
-                  <i class="bi bi-book" style="font-size:2rem"></i>
-                </div>
-              {{/if}}
-            </div>
-            <div class="card-body d-flex flex-column">
-              <h5 class="card-title">{{this.titulo}}</h5>
-              {{#if this.categoria}}
-                <p class="text-muted small mb-2"><i class="bi bi-tag"></i> {{this.categoria.nombre}}</p>
-              {{/if}}
-              <p class="text-primary fw-bold mb-3">{{formatPrice this.precio}}</p>
-              <a href="/libro/{{this.id}}" class="btn btn-primary mt-auto w-100">
-                Ver detalle
-              </a>
-            </div>
-          </div>
+  <div class="row g-4">
+    <div class="col-md-4">
+      <div class="card shadow-sm">
+        <img src="{{autor.foto}}" class="card-img-top" alt="{{autor.nombre}}" onerror="this.src='/images/default-book.jpg'">
+        <div class="card-body">
+          <h3 class="h5 mb-2">{{autor.nombre}}</h3>
+          {{#if autor.nacionalidad}}
+            <p class="mb-1"><i class="bi bi-flag"></i> {{autor.nacionalidad}}</p>
+          {{/if}}
+          {{#if autor.fecha_nacimiento}}
+            <p class="mb-0"><i class="bi bi-calendar-event"></i> Nació: {{autor.fecha_nacimiento}}</p>
+          {{/if}}
         </div>
-      {{/each}}
-    {{else}}
-      <div class="col-12">
-        <div class="alert alert-info">Este autor aún no tiene libros registrados.</div>
       </div>
-    {{/if}}
+    </div>
+
+    <div class="col-md-8">
+      {{#if autor.biografia}}
+        <h4 class="mb-3">Biografía</h4>
+        <p class="text-secondary">{{autor.biografia}}</p>
+      {{/if}}
+
+      <h4 class="mt-4 mb-3">Libros de {{autor.nombre}}</h4>
+      {{#if autor.libros.length}}
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3">
+          {{#each autor.libros}}
+            <div class="col">
+              <div class="card h-100">
+                <img src="{{this.imagen}}" class="card-img-top" alt="{{this.titulo}}" onerror="this.src='/images/default-book.jpg'">
+                <div class="card-body d-flex flex-column">
+                  <h5 class="card-title">{{this.titulo}}</h5>
+                  {{#if this.categoria}}
+                    <span class="badge bg-light text-dark border mt-auto">{{this.categoria.nombre}}</span>
+                  {{/if}}
+                  <a href="/libro/{{this.id}}" class="btn btn-primary w-100 mt-2">Ver detalle</a>
+                </div>
+              </div>
+            </div>
+          {{/each}}
+        </div>
+      {{else}}
+        <div class="alert alert-info">Este autor aún no tiene libros activos.</div>
+      {{/if}}
+    </div>
   </div>
 </div>
-
-

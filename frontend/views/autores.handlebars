@@ -68,46 +68,49 @@
     <div class="row g-4">
       {{#each autores}}
         <div class="col-md-6 col-lg-4 col-xl-3">
-          <a href="/autor/{{this.id}}" class="text-decoration-none">
-            <div class="card h-100 shadow-sm author-card">
-              <div class="card-body d-flex flex-column">
-                <div class="text-center mb-3">
-                  {{#if this.foto}}
-                  <img src="{{this.foto}}"
-                       class="img-fluid rounded author-photo"
-                       alt="{{this.nombre}}"
-                       loading="lazy"
-                       style="max-width: 100%; height: 200px; object-fit: cover;"
-                       onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'bg-light rounded d-flex align-items-center justify-content-center\' style=\'height: 200px\'><div class=\'text-center\'><i class=\'bi bi-person text-muted display-4\'></i><br><small class=\'text-muted\'>Sin imagen</small></div></div>';">
-                  {{else}}
-                  <div class="bg-light rounded d-flex align-items-center justify-content-center" style="height: 200px">
-                    <div class="text-center">
-                      <i class="bi bi-person text-muted display-4"></i>
-                      <br><small class="text-muted">Sin imagen</small>
-                    </div>
+          <div class="card h-100 shadow-sm author-card">
+            <div class="card-img-container position-relative" style="height: 200px; overflow: hidden; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center;">
+              {{#if this.foto}}
+                <img src="{{this.foto}}" 
+                     class="card-img-top" 
+                     style="max-width: 100%; max-height: 100%; object-fit: cover; transition: transform 0.3s ease;"
+                     alt="Foto de {{this.nombre}}"
+                     onerror="this.style.display='none'; this.parentElement.innerHTML='<div class=\'d-flex align-items-center justify-content-center h-100 text-white\'><div class=\'text-center\'><i class=\'fas fa-user fa-3x mb-2\'></i><br><small>{{this.nombre}}</small></div></div>';">
+              {{else}}
+                <div class="d-flex align-items-center justify-content-center h-100 text-white">
+                  <div class="text-center">
+                    <i class="fas fa-user fa-3x mb-2"></i>
+                    <br><small>{{this.nombre}}</small>
                   </div>
-                  {{/if}}
                 </div>
-
-                <h5 class="card-title fw-bold text-dark text-center">{{this.nombre}}</h5>
-
-                {{#if this.nacionalidad}}
+              {{/if}}
+            </div>
+            <div class="card-body d-flex flex-column">
+              <h5 class="card-title text-primary fw-bold text-center" style="min-height: 2.5rem; line-height: 1.25;">
+                {{this.nombre}}
+              </h5>
+              {{#if this.nacionalidad}}
                 <p class="text-muted text-center mb-2">
-                  <i class="bi bi-globe"></i> {{this.nacionalidad}}
+                  <i class="fas fa-globe me-1"></i>{{this.nacionalidad}}
                 </p>
-                {{/if}}
-
-                {{#if this.biografia}}
-                <p class="card-text text-muted small flex-grow-1">{{truncate this.biografia 100}}</p>
-                {{/if}}
-
-                <div class="d-flex justify-content-between align-items-center mt-auto">
-                  <span class="badge bg-primary">{{#if this.total_libros}}{{this.total_libros}}{{else}}0{{/if}} libros</span>
-                  <span class="text-muted small">Perfil <i class="bi bi-arrow-right"></i></span>
-                </div>
+              {{/if}}
+              {{#if this.fecha_nacimiento}}
+                <p class="text-muted text-center mb-2">
+                  <i class="fas fa-calendar me-1"></i>{{formatDate this.fecha_nacimiento}}
+                </p>
+              {{/if}}
+              {{#if this.biografia}}
+                <p class="card-text text-muted small" style="flex-grow: 1;">
+                  {{truncate this.biografia 120}}
+                </p>
+              {{/if}}
+              <div class="mt-auto">
+                <a href="/autor/{{this.id}}" class="btn btn-primary w-100">
+                  <i class="fas fa-user me-2"></i>Ver perfil
+                </a>
               </div>
             </div>
-          </a>
+          </div>
         </div>
       {{/each}}
     </div>
@@ -177,21 +180,21 @@
 <!-- Estilos adicionales -->
 <style>
 .author-card {
-  transition: all 0.3s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
   cursor: pointer;
 }
 
 .author-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
 }
 
-.author-card:hover .author-photo {
+.author-card:hover .card-img-top {
   transform: scale(1.05);
 }
 
-.author-photo {
-  transition: transform 0.3s ease;
+.card-img-container {
+  border-radius: 0.375rem 0.375rem 0 0;
 }
 
 @media (max-width: 768px) {
