@@ -37,21 +37,19 @@ npm start
 
 El frontend correrá en: http://localhost:3000
 
-### Rutas Implementadas
+### Rutas Básicas Configuradas
 
-- `GET /` - Inicio
-- `GET /libros` - Catálogo de libros (con filtros y paginación)
-- `GET /libro/:id` - Detalle de libro
-- `GET /autores` - Catálogo de autores (con búsqueda y paginación)
-- `GET /autor/:id` - Detalle de autor
-- `GET /login` - Formulario de inicio de sesión
-- `POST /login` - Autenticación (guardar token en cookie)
-- `GET /logout` - Cerrar sesión
-- `GET /carrito` - Carrito de compras (básico)
+- `GET /` - Página principal (prueba conexión con backend)
+- `GET /test-backend` - Prueba de conexión con backend
+- `GET /libros` - Catálogo de libros (por implementar)
+- `GET /categorias` - Página de categorías (por implementar)
+- `GET /autores` - Página de autores (por implementar)
+- `GET /carrito` - Carrito de compras (por implementar)
+- `GET /admin` - Panel de administración (por implementar)
 
-### APIs del Backend
+### APIs del Backend Disponibles
 
-El backend está en http://localhost:3001 y expone rutas REST (ver `backend/respuestasServicios.md`).
+El backend está en http://localhost:3001 y tiene estas rutas:
 
 #### Libros
 - `GET /api/libros` - Obtener todos los libros
@@ -88,22 +86,25 @@ El backend está en http://localhost:3001 y expone rutas REST (ver `backend/resp
 - `PUT /api/pedidos/:id` - Actualizar pedido
 - `DELETE /api/pedidos/:id` - Eliminar pedido
 
-### Imágenes de autores
-Coloca en `frontend/public/images/` las imágenes con estos nombres para usar fotos reales:
+### Tareas por Implementar
 
-- `garcia-marquez.jpg`
-- `isabel-allende.jpg`
-- `mario-vargas-llosa.jpg`
-- `julio-cortazar.jpg`
-- `octavio-paz.jpg`
-- `stephen-king.jpg`
+1. **Configurar motor de plantillas** (EJS, Handlebars, etc.)
+2. **Crear vistas HTML con Bootstrap** para:
+   - Página principal
+   - Catálogo de libros
+   - Detalle de libro
+   - Categorías
+   - Autores
+   - Carrito de compras
+   - Formularios de registro/login
+   - Panel de administración
 
-Luego ejecuta en backend:
-
-```bash
-cd backend
-npm run update-author-images
-```
+3. **Implementar funcionalidades**:
+   - Sistema de carrito de compras
+   - Autenticación de usuarios
+   - Formularios para CRUD
+   - Búsqueda y filtros
+   - Paginación
 
 ### Notas de Desarrollo
 

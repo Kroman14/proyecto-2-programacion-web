@@ -1,5 +1,5 @@
 <!-- Hero Section -->
-<section class="hero-section bg-gradient-primary text-black py-5">
+<section class="hero-section bg-gradient-primary text-white py-5">
     <div class="container">
         <div class="row align-items-center">
             <div class="col-lg-6">
@@ -14,7 +14,7 @@
                     <a href="/libros" class="btn btn-light btn-lg">
                         <i class="bi bi-search"></i> Explorar Catálogo
                     </a>
-                    <a href="/categorias" class="btn btn-light btn-lg">
+                    <a href="/categorias" class="btn btn-outline-light btn-lg">
                         <i class="bi bi-tags"></i> Ver Categorías
                     </a>
                 </div>
@@ -93,7 +93,7 @@
                                 <span class="h5 text-success mb-0">{{formatPrice precio}}</span>
                                 <button class="btn btn-primary btn-sm add-to-cart" 
                                         data-book-id="{{id}}"
-                                        onclick="event.preventDefault(); event.stopPropagation(); addToCart({{id}}, '{{titulo}}', {{precio}}, '{{imagen}}');">
+                                        onclick="event.preventDefault(); event.stopPropagation(); addToCart({{id}}, '{{titulo}}', {{precio}});">
                                     <i class="bi bi-cart-plus"></i> Agregar
                                 </button>
                             </div>
@@ -170,9 +170,6 @@
     </div>
 </section>
 
-<!-- Toast Container para notificaciones -->
-<div id="toast-container" class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999;"></div>
-
 <!-- Estilos adicionales para las cards clicables -->
 <style>
 .book-card {
@@ -208,7 +205,7 @@ a:hover .card {
 
 <!-- JavaScript para el carrito -->
 <script>
-function addToCart(id, titulo, precio, imagen) {
+function addToCart(id, titulo, precio) {
     // Obtener carrito actual del localStorage
     let carrito = JSON.parse(localStorage.getItem('carrito')) || [];
     
@@ -222,7 +219,6 @@ function addToCart(id, titulo, precio, imagen) {
             id: id,
             titulo: titulo,
             precio: precio,
-            imagen: imagen,
             cantidad: 1
         });
     }
@@ -231,66 +227,20 @@ function addToCart(id, titulo, precio, imagen) {
     localStorage.setItem('carrito', JSON.stringify(carrito));
     
     // Mostrar confirmación
-    showToast(`"${titulo}" agregado al carrito`, 'success');
+    alert(`"${titulo}" agregado al carrito`);
     
     // Actualizar contador del carrito si existe
     updateCartCounter();
 }
 
-// Función para mostrar notificaciones toast
-function showToast(message, type = 'info') {
-    const toastContainer = document.getElementById('toast-container');
-    if (!toastContainer) {
-        // Crear contenedor de toasts si no existe
-        const container = document.createElement('div');
-        container.id = 'toast-container';
-        container.className = 'toast-container position-fixed top-0 end-0 p-3';
-        container.style.zIndex = '9999';
-        document.body.appendChild(container);
-    }
-
-    const toastId = 'toast-' + Date.now();
-    const toastHtml = `
-        <div id="${toastId}" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-            <div class="toast-header bg-${type} text-white">
-                <strong class="me-auto">Notificación</strong>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
-            </div>
-            <div class="toast-body">
-                ${message}
-            </div>
-        </div>
-    `;
-
-    toastContainer.innerHTML += toastHtml;
-    const toastElement = document.getElementById(toastId);
-    
-    if (typeof bootstrap !== 'undefined' && bootstrap.Toast) {
-        const toast = new bootstrap.Toast(toastElement);
-        toast.show();
-    } else {
-        // Fallback si Bootstrap no está disponible
-        toastElement.style.display = 'block';
-        setTimeout(() => {
-            toastElement.remove();
-        }, 3000);
-    }
-}
-
 function updateCartCounter() {
-    // Usar la función global si está disponible
-    if (typeof window.updateCartCounter === 'function') {
-        window.updateCartCounter();
-    } else {
-        // Fallback local
-        const carrito = JSON.parse(localStorage.getItem('carrito')) || [];
-        const totalItems = carrito.reduce((sum, item) => sum + item.cantidad, 0);
-        
-        const cartCounters = document.querySelectorAll('.cart-counter');
-        cartCounters.forEach(counter => {
-            counter.textContent = totalItems;
-            counter.style.display = totalItems > 0 ? 'inline' : 'none';
-        });
+    const carrito = JSON.parse(localStorage.getItem('carrito')) || [];
+    const totalItems = carrito.reduce((sum, item) => sum + item.cantidad, 0);
+    
+    const badge = document.querySelector('.navbar .badge');
+    if (badge) {
+        badge.textContent = totalItems;
+        badge.style.display = totalItems > 0 ? 'inline' : 'none';
     }
 }
 

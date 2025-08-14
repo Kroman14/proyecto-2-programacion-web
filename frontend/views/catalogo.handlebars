@@ -114,14 +114,6 @@
               <div class="mt-auto">
                 <div class="d-flex justify-content-between align-items-center">
                   <span class="h5 text-success mb-0 fw-bold">${{this.precio}}</span>
-                  <button class="btn btn-outline-primary btn-sm add-to-cart" 
-                          data-id="{{this.id}}" 
-                          data-title="{{this.titulo}}" 
-                          data-price="{{this.precio}}"
-                          data-image="{{this.imagen}}"
-                          onclick="addToCartFromCatalog({{this.id}}, '{{this.titulo}}', {{this.precio}}, '{{this.imagen}}')">
-                    <i class="bi bi-cart-plus"></i>
-                  </button>
                   <a href="/libro/{{this.id}}" class="btn btn-primary btn-sm">
                     <i class="fas fa-eye"></i> Ver detalle
                   </a>
@@ -202,9 +194,6 @@
     </div>
   {{/if}}
 </div>
-
-<!-- Toast Container para notificaciones -->
-<div id="toast-container" class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999;"></div>
 
 <!-- Estilos adicionales -->
 <style>
@@ -347,79 +336,5 @@ document.addEventListener('DOMContentLoaded', function() {
   images.forEach((img, index) => {
     console.log(`${index + 1}. ${img.src}`);
   });
-  
-  // Funcionalidad del carrito para el catálogo
-  window.addToCartFromCatalog = function(id, titulo, precio, imagen) {
-    // Obtener carrito actual del localStorage
-    let carrito = JSON.parse(localStorage.getItem('carrito')) || [];
-    
-    // Buscar si el libro ya existe en el carrito
-    const existingItem = carrito.find(item => item.id === id);
-    
-    if (existingItem) {
-      existingItem.cantidad += 1;
-    } else {
-      carrito.push({
-        id: id,
-        titulo: titulo,
-        precio: precio,
-        imagen: imagen,
-        cantidad: 1
-      });
-    }
-    
-    // Guardar en localStorage
-    localStorage.setItem('carrito', JSON.stringify(carrito));
-    
-    // Mostrar confirmación
-    showToast(`"${titulo}" agregado al carrito`, 'success');
-    
-    // Actualizar contador del carrito
-    if (typeof window.updateCartCounter === 'function') {
-      window.updateCartCounter();
-    } else if (typeof updateCartCounter === 'function') {
-      updateCartCounter();
-    }
-  };
-  
-  // Función para mostrar notificaciones toast
-  function showToast(message, type = 'info') {
-    const toastContainer = document.getElementById('toast-container');
-    if (!toastContainer) {
-      // Crear contenedor de toasts si no existe
-      const container = document.createElement('div');
-      container.id = 'toast-container';
-      container.className = 'toast-container position-fixed top-0 end-0 p-3';
-      container.style.zIndex = '9999';
-      document.body.appendChild(container);
-    }
-
-    const toastId = 'toast-' + Date.now();
-    const toastHtml = `
-      <div id="${toastId}" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-        <div class="toast-header bg-${type} text-white">
-          <strong class="me-auto">Notificación</strong>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
-        </div>
-        <div class="toast-body">
-          ${message}
-        </div>
-      </div>
-    `;
-
-    toastContainer.innerHTML += toastHtml;
-    const toastElement = document.getElementById(toastId);
-    
-    if (typeof bootstrap !== 'undefined' && bootstrap.Toast) {
-      const toast = new bootstrap.Toast(toastElement);
-      toast.show();
-    } else {
-      // Fallback si Bootstrap no está disponible
-      toastElement.style.display = 'block';
-      setTimeout(() => {
-        toastElement.remove();
-      }, 3000);
-    }
-  }
 });
 </script>

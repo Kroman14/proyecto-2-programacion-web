@@ -1,25 +1,64 @@
-<!-- Login -->
-<div class="container my-5" style="max-width: 540px;">
-  <h1 class="fw-bold text-center mb-4">Iniciar sesión</h1>
+<div class="container py-5" style="max-width: 480px;">
+  <h1 class="h3 mb-4 text-center">Iniciar sesión</h1>
 
-  {{#if error}}
-    <div class="alert alert-danger">{{error}}</div>
-  {{/if}}
+  <div id="login-alert" class="alert d-none" role="alert"></div>
 
-  <form method="POST" action="/login" class="card shadow-sm p-4">
+  <form id="login-form" class="card shadow-sm p-4">
     <div class="mb-3">
-      <label for="email" class="form-label">Correo electrónico</label>
-      <input type="email" name="email" id="email" class="form-control" placeholder="tu@email.com" required>
+      <label class="form-label">Email</label>
+      <input type="email" class="form-control" id="email" placeholder="tu@email.com" required>
     </div>
     <div class="mb-3">
-      <label for="password" class="form-label">Contraseña</label>
-      <input type="password" name="password" id="password" class="form-control" placeholder="••••••••" required>
+      <label class="form-label">Contraseña</label>
+      <input type="password" class="form-control" id="password" placeholder="••••••••" required>
     </div>
-    <button type="submit" class="btn btn-primary w-100">Ingresar</button>
+    <button type="submit" class="btn btn-primary w-100">
+      <i class="bi bi-box-arrow-in-right"></i> Entrar
+    </button>
   </form>
-  <div class="text-center mt-3">
-    <small class="text-muted">Usuario demo: admin@ecommerce.com / admin123</small>
-  </div>
+
+  <p class="text-muted mt-3">Usuarios de prueba (luego de ejecutar seed):
+    <br>admin@ecommerce.com / <code>admin123</code>
+    <br>juan@email.com / <code>cliente123</code>
+  </p>
 </div>
 
+<script>
+  const BACKEND_URL = '{{backendUrl}}';
 
+  const form = document.getElementById('login-form');
+  const alertBox = document.getElementById('login-alert');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    alertBox.className = 'alert d-none';
+
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+
+    try {
+      const resp = await fetch(`${BACKEND_URL}/auth/login`, {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ email, password })
+      });
+
+      const data = await resp.json();
+      if (!resp.ok) {
+        throw new Error(data.error || 'Error al iniciar sesión');
+      }
+
+      // Guardar token y usuario en localStorage
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('usuario', JSON.stringify(data.usuario));
+
+      // Redirigir al home o al carrito si venías de ahí
+      const backTo = sessionStorage.getItem('backTo') || '/';
+      sessionStorage.removeItem('backTo');
+      window.location.href = backTo;
+    } catch (err) {
+      alertBox.className = 'alert alert-danger';
+      alertBox.textContent = err.message;
+    }
+  });
+</script>
